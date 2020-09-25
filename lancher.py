@@ -4,17 +4,18 @@ import asyncio
 import discord
 import random
 
-bot = commands.Bot(command_prefix="!")
+#bot = commands.Bot(command_prefix="!")
+client = discord.Client()
 
 random_name = ["おはし","ととろ","とんかつ"]
 
-@bot.event
+@client.event
 async def on_ready():
     print("on_ready")
 
-@bot.event
+@client.event
 async def on_message(message):
-    if message.author == bot.user:
+    if message.author == client.user:
     # Bot からのメッセージには反応しない
     # この判定をしないと無限ループが起きる
         return
@@ -27,22 +28,25 @@ async def on_message(message):
         await message.channel.send("ナナミさーん、ととろいるよ🥺")
 
     if "扉" in message.content:
-        if bot.user != message.author:
+        if client.user != message.author:
             role = discord.utils.get(message.guild.roles, name='扉')
             await message.author.add_roles(role)
 
-    await bot.process_commands(message)
+    if "!delete" in message.content:
+        if message.author.guild_permissions.administrator:
+            await message.channel.send('削除するぞ')
+            await message.channel.purge()
+        else:
+            await message.channel.send('消せないぞ')
 
-@bot.command()
-async def totoro(ctx):
-    await ctx.send(f"{ctx.author.name} さん、ととろいるよ🥺")
+ #   await client.process_commands(message)
 
-@bot.command()
-async def delete(ctx):
-    await ctx.send('削除するぞ！')
-    await ctx.channel.purge()
+#@client.command()
+#async def delete(ctx):
+#    await ctx.send('削除するぞ！')
+#    await ctx.channel.purge()
 
-@bot.event
+@client.event
 async def on_mention(message):
     if message.author.guild_permissions.administrator:
         mentions = message.mentions
@@ -57,4 +61,4 @@ async def on_mention(message):
     else:
         await message.channel.send('Error')
 
-bot.run(config.TOKEN)
+client.run(config.TOKEN)
